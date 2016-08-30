@@ -87,7 +87,7 @@ module Cerulean
           when 'Float'
             Float(val) rescue false
           when 'Boolean'
-            %w(true false).include?(val.downcase)
+            %w(true false).include?(val.to_s.downcase)
           when 'Array[Integer]'
             !val.any? { |el| !Integer(el) rescue true }
           when 'Array[Float]'
@@ -127,7 +127,7 @@ module Cerulean
                 end
 
                 if opts.has_key?(:values)
-                  unless opts[:values].include?(params[param])
+                  unless opts[:values].map { |val| val.to_s }.include?(params[param])
                     raise "#{param} must be one of #{opts[:values]}"
                   end
                 end
