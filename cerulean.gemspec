@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'cerulean'
-  s.version     = '0.0.5'
+  s.version     = '0.0.6'
   s.date        = '2016-07-27'
   s.summary     = "Cerulean"
   s.description = "REST API DSL."

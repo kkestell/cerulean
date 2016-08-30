@@ -80,22 +80,40 @@ module Cerulean
           @meta ||= self.class.class_variable_get(:@@meta)[action_name.to_sym]
         end
 
-        def validate_param_type(val, type)
-          case type.to_s
-          when 'Integer'
-            Integer(val) rescue false
-          when 'Float'
-            Float(val) rescue false
-          when 'Boolean'
-            %w(true false).include?(val.to_s.downcase)
-          when 'Array[Integer]'
-            !val.any? { |el| !Integer(el) rescue true }
-          when 'Array[Float]'
-            !val.any? { |el| !Float(el) rescue true }
-          when 'Array[Boolean]'
-            !val.any? { |el| %w(true false).include?(el.downcase) }
-          else
+        def parse_integer(val)
+          Integer(val) rescue nil
+        end
+
+        def parse_float(val)
+          Float(val) rescue nil
+        end
+
+        def parse_boolean(val)
+          case val.to_s.downcase
+          when 'true'
             true
+          when 'false'
+            false
+          else
+            nil
+          end
+        end
+
+        def validate_param_type(val, type)
+          if val.is_a?(Array)
+            parsed = val.map { |el| validate_param_type(el, type[0].to_s) }
+            parsed.all? ? parsed : nil
+          else
+            case type.to_s
+            when 'Integer'
+              parse_integer(val)
+            when 'Float'
+              parse_float(val)
+            when 'Boolean'
+              parse_boolean(val)
+            when 'String'
+              val
+            end
           end
         end
 
@@ -112,27 +130,31 @@ module Cerulean
             @declared = {}
             meta[:params].each do |param, opts|
               if params.has_key?(param.to_s)
-                raise "#{param} is not a #{opts[:type]}" unless validate_param_type(params[param.to_s], opts[:type])
+                p = validate_param_type(params[param.to_s], opts[:type])
+                
+                if p.nil?
+                  raise "#{param} is not a #{opts[:type]}"
+                end
 
                 if opts.has_key?(:min)
-                  if Float(params[param]) < opts[:min]
+                  if p < opts[:min]
                     raise "#{param} must be greater than or equal to #{opts[:min]}"
                   end
                 end
 
                 if opts.has_key?(:max)
-                  if Float(params[param]) > opts[:max]
+                  if p > opts[:max]
                     raise "#{param} must be less than or equal to #{opts[:max]}"
                   end
                 end
 
                 if opts.has_key?(:values)
-                  unless opts[:values].map { |val| val.to_s }.include?(params[param])
+                  unless opts[:values].map { |val| val.to_s }.include?(p.to_s)
                     raise "#{param} must be one of #{opts[:values]}"
                   end
                 end
 
-                @declared[param] = params[param]
+                @declared[param] = p
               else
                 params[param] = opts[:default] if opts.has_key?(:default)
                 raise "#{param} is required" if opts[:required]
