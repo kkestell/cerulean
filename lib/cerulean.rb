@@ -1,4 +1,4 @@
-module Boolean; end
+require 'boolean'
 
 class ActionDSL
   def initialize(controller, name:, &block)
@@ -50,12 +50,22 @@ module Cerulean
       endpoint(name, &block)
     end
 
+    def put(name, &block)
+      endpoint(name, &block)
+    end
+
+    def delete(name, &block)
+      endpoint(name, &block)
+    end
+
     def endpoint(name, &block)
       self.class_variable_set(:@@meta, {}) unless self.class_variable_defined?(:@@meta)
 
       ActionDSL.new(self, name: name, &block)
     
       self.class_exec do
+        require 'boolean'
+
         def declared()
           @declared ||= {} #Hashie::Mash.new(params)
         end
@@ -80,39 +90,19 @@ module Cerulean
           @meta ||= self.class.class_variable_get(:@@meta)[action_name.to_sym]
         end
 
-        def parse_integer(val)
-          Integer(val) rescue nil
-        end
-
-        def parse_float(val)
-          Float(val) rescue nil
-        end
-
-        def parse_boolean(val)
-          case val.to_s.downcase
-          when 'true'
-            true
-          when 'false'
-            false
-          else
-            nil
-          end
-        end
-
         def validate_param_type(val, type)
           if val.is_a?(Array)
-            parsed = val.map { |el| validate_param_type(el, type[0].to_s) }
-            parsed.all? ? parsed : nil
+            parsed = val.map { |el| validate_param_type(el, type[0]) }
+            parsed.all? { |el| !el.nil? } ? parsed : nil
           else
-            case type.to_s
-            when 'Integer'
-              parse_integer(val)
-            when 'Float'
-              parse_float(val)
-            when 'Boolean'
-              parse_boolean(val)
-            when 'String'
+            if type == String
               val
+            elsif type == Date
+              Date.parse(val) rescue nil
+            elsif type == DateTime
+              DateTime.parse(val) rescue nil
+            else
+              Kernel.send(type.to_s, val) rescue nil
             end
           end
         end
@@ -133,7 +123,7 @@ module Cerulean
                 p = validate_param_type(params[param.to_s], opts[:type])
                 
                 if p.nil?
-                  raise "#{param} is not a #{opts[:type]}"
+                  raise "#{param} (#{param.to_s}) is not a #{opts[:type]}"
                 end
 
                 if opts.has_key?(:min)
