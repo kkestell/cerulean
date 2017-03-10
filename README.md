@@ -8,7 +8,7 @@ Cerulean is a reasonably unopinionated DSL for writing APIs in Rails.
 
 Add a reference to Cerulean in your `Gemfile`:
 
-```
+```ruby
 gem 'cerulean'
 ```
 
@@ -16,6 +16,14 @@ Include Cerulean in your base controller class:
 
 ```ruby
 class ApplicationController < ActionController::API
+  include Cerulean
+end
+```
+
+Or include it in individual controllers as-needed:
+
+```ruby
+class PostsController < ApplicationController
   include Cerulean
 end
 ```
