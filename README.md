@@ -76,6 +76,14 @@ The following param types are supported:
 
 Arrays are also supported using `Array[Foo]` where `Foo` is one of the primitive types listed above.
 
+#### Validations
+
+* `min`
+* `max`
+* `required`
+* `values`
+* `default`
+
 ### Presenters
 
 TODO
