@@ -37,6 +37,13 @@ class ActionDSL
 end
 
 module Cerulean
+  class ParamsInvalid < StandardError
+    attr_reader :errors
+    def initialize(errors)
+      @errors = errors
+    end
+  end
+
   def self.included(receiver)
     receiver.extend(ClassMethods)
   end
@@ -118,38 +125,47 @@ module Cerulean
           
           if meta.has_key?(:params)
             @declared = {}
+            errors = {}
             meta[:params].each do |param, opts|
               if params.has_key?(param.to_s)
                 p = validate_param_type(params[param.to_s], opts[:type])
                 
                 if p.nil?
-                  raise "#{param} (#{param.to_s}) is not a #{opts[:type]}"
+                  errors[param] ||= []
+                  errors[param] << "#{param.to_s} is not a #{opts[:type].to_s.downcase}"
                 end
 
                 if opts.has_key?(:min)
                   if p < opts[:min]
-                    raise "#{param} must be greater than or equal to #{opts[:min]}"
+                    errors[param] ||= []
+                    errors[param] << "must be greater than or equal to #{opts[:min]}"
                   end
                 end
 
                 if opts.has_key?(:max)
                   if p > opts[:max]
-                    raise "#{param} must be less than or equal to #{opts[:max]}"
+                    errors[param] ||= []
+                    errors[param] << "must be less than or equal to #{opts[:max]}"
                   end
                 end
 
                 if opts.has_key?(:values)
                   unless opts[:values].map { |val| val.to_s }.include?(p.to_s)
-                    raise "#{param} must be one of #{opts[:values]}"
+                    errors[param] ||= []
+                    errors[param] << "must be one of #{opts[:values]}"
                   end
                 end
 
                 @declared[param] = p
               else
                 params[param] = opts[:default] if opts.has_key?(:default)
-                raise "#{param} is required" if opts[:required]
+                if opts[:required]
+                  errors[param] ||= []
+                  errors[param] << "is required"
+                end
               end
             end
+            raise ParamsInvalid.new(errors) if errors.keys.any?
           end
         end
       end

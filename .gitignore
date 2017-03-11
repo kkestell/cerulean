@@ -41,5 +41,5 @@ bower.json
 # Ignore Byebug command history file.
 .byebug_history
 
-# Gem
-cerulean-0.0.0.gem
+# Gems
+*.gem

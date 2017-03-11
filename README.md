@@ -84,6 +84,16 @@ Arrays are also supported using `Array[Foo]` where `Foo` is one of the primitive
 * `values`
 * `default`
 
+When parameter validation fails, a `Cerulean::InvalidParams` exception will be raised. Validation error messages can be accessed via the `errors` property of the exception. For example:
+
+```ruby
+{
+  username: ['is required'],
+  length: ['is not a float'],
+  age: ['must be less than or equal to 100']
+}
+```
+
 ### Presenters
 
 TODO
