@@ -133,26 +133,33 @@ module Cerulean
                 if p.nil?
                   errors[param] ||= []
                   errors[param] << "#{param.to_s} is not a #{opts[:type].to_s.downcase}"
-                end
-
-                if opts.has_key?(:min)
-                  if p < opts[:min]
-                    errors[param] ||= []
-                    errors[param] << "must be greater than or equal to #{opts[:min]}"
+                else
+                  if opts.has_key?(:min) || opts.has_key?(:max)
+                    unless (Float(p) rescue false)
+                      errors[param] ||= []
+                      errors[param] << "must be a number"
+                    end
                   end
-                end
 
-                if opts.has_key?(:max)
-                  if p > opts[:max]
-                    errors[param] ||= []
-                    errors[param] << "must be less than or equal to #{opts[:max]}"
+                  if opts.has_key?(:min)
+                    if p < opts[:min]
+                      errors[param] ||= []
+                      errors[param] << "must be greater than or equal to #{opts[:min]}"
+                    end
                   end
-                end
 
-                if opts.has_key?(:values)
-                  unless opts[:values].map { |val| val.to_s }.include?(p.to_s)
-                    errors[param] ||= []
-                    errors[param] << "must be one of #{opts[:values]}"
+                  if opts.has_key?(:max)
+                    if p > opts[:max]
+                      errors[param] ||= []
+                      errors[param] << "must be less than or equal to #{opts[:max]}"
+                    end
+                  end
+
+                  if opts.has_key?(:values)
+                    unless opts[:values].map { |val| val.to_s }.include?(p.to_s)
+                      errors[param] ||= []
+                      errors[param] << "must be one of #{opts[:values]}"
+                    end
                   end
                 end
 

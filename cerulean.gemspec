@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'cerulean'
-  s.version     = '0.11.0'
-  s.date        = '2016-07-27'
+  s.version     = '0.11.1'
+  s.date        = '2017-03-11'
   s.summary     = "Cerulean"
   s.description = "API DSL."
   s.authors     = ["Kyle Kestell"]
