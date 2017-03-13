@@ -186,7 +186,7 @@ end
 
 ```ruby
 post :create do
-  form :foo, FooForm
+  form FooForm
   presenter FooPresenter
   request do
     present @form.save!
@@ -196,7 +196,7 @@ end
 
 #### Specifying an Alternate Key
 
-The `form` method takes an optional keyword argument, `key`. This allows you to grab just a piece of your JSON payload for binding to the form object.
+The `form` method supports targeting a specific key in the request JSON for form binding.
 
 ##### JSON
 
@@ -212,7 +212,7 @@ The `form` method takes an optional keyword argument, `key`. This allows you to 
 
 ```ruby
 post :create do
-  form :foo, FooForm, key: :foo
+  form :foo, FooForm
   # ...
 end
 ```
