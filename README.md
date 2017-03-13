@@ -28,7 +28,7 @@ class PostsController < ApplicationController
 end
 ```
 
-## Use
+## Documentation
 
 ### Defining Endpoints
 
@@ -96,11 +96,126 @@ When parameter validation fails, a `Cerulean::InvalidParams` exception will be r
 
 ### Presenters
 
-TODO
+Presenters are classes which satisfy two criteria:
+
+* They accept a model instance as an argument to their constructor.
+* They implement an `as_json` method.
+
+Cerulean provides the `presenter` method to declare a presenter for an endpoint, and a `present` method to instantiate that presenter, call `as_json`, and automatically return the result.
+
+#### Example
+
+##### Presenter
+
+```ruby
+class FooPresenter
+  def initialize(foo)
+    @foo = foo
+  end
+
+  def as_json()
+    @foo.as_json
+  end
+end
+```
+
+##### Controller Action
+
+```ruby
+get :show do
+  params do
+    param :id, Integer, required: true
+  end
+  presenter FooPresenter
+  request do
+    present Foo.find(declared[:id])
+  end
+end
+```
 
 ### Forms
 
-TODO
+Forms are classes which accept a params hash as an argument to their constructor.
+
+Cerulean provides the `form` method for declaring the form for an endpoint. The form will be instantiated automatically using the `params` hash from the action and can be accessed via `@form`.
+
+#### Example 
+
+##### JSON
+
+```json
+{
+  "name": "Hello World"
+}
+```
+
+##### Form Object
+
+```ruby
+class FooForm
+  def initialize(params)
+    @foo = params.has_key?(:id) && Foo.find_by(id: params[:id]) || Foo.new
+  end
+
+  attribute :name, String
+  
+  def errors
+    @foo.errors
+  end
+
+  def valid?
+    build
+    @foo.valid?
+  end
+
+  def save!
+    build
+    @foo.save!
+    @foo
+  end
+
+  private
+
+  def build
+    @foo.name = self.name
+  end
+end
+```
+
+##### Controller Action
+
+```ruby
+post :create do
+  form :foo, FooForm
+  presenter FooPresenter
+  request do
+    present @form.save!
+  end
+end
+```
+
+#### Specifying an Alternate Key
+
+The `form` method takes an optional keyword argument, `key`. This allows you to grab just a piece of your JSON payload for binding to the form object.
+
+##### JSON
+
+```json
+{
+  "foo": {
+    "name": "Hello World"
+  }
+}
+```
+
+##### Controller Action
+
+```ruby
+post :create do
+  form :foo, FooForm, key: :foo
+  # ...
+end
+```
 
 ## License (MIT)
 
