@@ -77,20 +77,24 @@ module Cerulean
           @declared ||= {} #Hashie::Mash.new(params)
         end
 
-        def present(object, **opts)
+        def render_presenter(object, **opts)
           if object.is_a?(Array) || object.is_a?(ActiveRecord::Relation)
             if opts.any?
-              render json: object.map { |el| meta[:presenter].new(el).as_json(**opts) }
+              object.map { |el| meta[:presenter].new(el).as_json(**opts) }
             else
-              render json: object.map { |el| meta[:presenter].new(el).as_json() }
+              object.map { |el| meta[:presenter].new(el).as_json() }
             end
           else
             if opts.any?
-              render json: meta[:presenter].new(object).as_json(**opts)
+              meta[:presenter].new(object).as_json(**opts)
             else
-              render json: meta[:presenter].new(object).as_json()
+              meta[:presenter].new(object).as_json()
             end
           end
+        end
+
+        def present(object, **opts)
+          render json: render_presenter(object, **opts)
         end
 
         def meta
@@ -165,7 +169,7 @@ module Cerulean
 
                 @declared[param] = p
               else
-                params[param] = opts[:default] if opts.has_key?(:default)
+                @declared[param] = opts[:default] if opts.has_key?(:default)
                 if opts[:required]
                   errors[param] ||= []
                   errors[param] << "is required"
