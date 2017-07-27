@@ -69,7 +69,7 @@ module Cerulean
       self.class_variable_set(:@@meta, {}) unless self.class_variable_defined?(:@@meta)
 
       ActionDSL.new(self, name: name, &block)
-    
+
       self.class_exec do
         require 'boolean'
 
@@ -120,20 +120,25 @@ module Cerulean
 
         before_action do
           if meta.has_key?(:form)
+            p = params
+            p = p.permit! if params.respond_to?(:permit!)
+
             if meta[:form].has_key?(:key) && meta[:form][:key]
-              @form = meta[:form][:klass].new(params[meta[:form][:key]])
-            else
-              @form = meta[:form][:klass].new(params)
+              p = params[meta[:form][:key]]
             end
+
+            p = p&.to_hash&.deep_symbolize_keys
+
+            @form = meta[:form][:klass].new(p)
           end
-          
+
           if meta.has_key?(:params)
             @declared = {}
             errors = {}
             meta[:params].each do |param, opts|
               if params.has_key?(param.to_s)
                 p = validate_param_type(params[param.to_s], opts[:type])
-                
+
                 if p.nil?
                   errors[param] ||= []
                   errors[param] << "#{param.to_s} is not a #{opts[:type].to_s.downcase}"
