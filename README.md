@@ -2,7 +2,7 @@
 
 ## API DSL for Rails
 
-Cerulean is a reasonably unopinionated DSL for writing APIs in Rails. 
+Cerulean is a reasonably unopinionated DSL for writing APIs in Rails.
 
 ## Installation
 
@@ -83,6 +83,7 @@ Arrays are also supported using `Array[Foo]` where `Foo` is one of the primitive
 * `required`
 * `values`
 * `default`
+* `null`
 
 When parameter validation fails, a `Cerulean::InvalidParams` exception will be raised. Validation error messages can be accessed via the `errors` property of the exception. For example:
 
@@ -139,7 +140,7 @@ Forms are classes which accept a params hash as an argument to their constructor
 
 Cerulean provides the `form` method for declaring the form for an endpoint. The form will be instantiated automatically using the `params` hash from the action and can be accessed via `@form`.
 
-#### Example 
+#### Example
 
 ##### JSON
 
@@ -158,7 +159,7 @@ class FooForm
   end
 
   attribute :name, String
-  
+
   def errors
     @foo.errors
   end

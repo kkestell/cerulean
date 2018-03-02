@@ -108,6 +108,14 @@ module Cerulean
           else
             if type == String
               val
+            elsif type == Boolean
+              if val.blank? || val.downcase == 'null'
+                nil
+              elsif val.downcase == 'true'
+                true
+              else
+                false
+              end
             elsif type == Date
               Date.parse(val) rescue nil
             elsif type == DateTime
@@ -139,7 +147,7 @@ module Cerulean
               if params.has_key?(param.to_s)
                 p = validate_param_type(params[param.to_s], opts[:type])
 
-                if p.nil?
+                if p.nil? && opts[:null] != true
                   errors[param] ||= []
                   errors[param] << "#{param.to_s} is not a #{opts[:type].to_s.downcase}"
                 else
