@@ -1,3 +1,7 @@
+🚨🚨🚨 **Cerulean is no longer maintained. Check out [Fern](https://github.com/fern-rb/fern-api), which is mostly API-compatible.**
+
+---
+
 # Cerulean
 
 ## API DSL for Rails
